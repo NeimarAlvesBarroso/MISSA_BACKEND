@@ -1,0 +1,4 @@
+cd C:\Users\PG-INFO\missa-backend
+npm run dev
+npm install mongoose
+
