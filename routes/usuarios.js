@@ -1,27 +1,32 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcrypt");
 const Usuario = require("../models/usuario");
 
-router.post("/cadastro", async (req, res) => {
-  const { nome, email, senha } = req.body;
-
+// Listar todos os usuários
+router.get("/", async (req, res) => {
   try {
-    const usuarioExistente = await Usuario.findOne({ email });
-    if (usuarioExistente) {
-      return res.status(400).json({ erro: "Email já cadastrado" });
-    }
-
-    const senhaHash = await bcrypt.hash(senha, 10);
-
-    const novoUsuario = new Usuario({ nome, email, senha: senhaHash });
-    await novoUsuario.save();
-
-    res.status(201).json({ mensagem: "Usuário cadastrado com sucesso" });
+    const usuarios = await Usuario.find();
+    res.json(usuarios);
   } catch (erro) {
-    res.status(500).json({ erro: "Erro ao cadastrar usuário" });
+    res.status(500).json({ erro: "Erro ao buscar usuários" });
+  }
+});
+
+// Criar novo usuário
+router.post("/", async (req, res) => {
+  try {
+    const { nome, papel, projeto } = req.body;
+    const novoUsuario = new Usuario({
+      nome,
+      papel,
+      projeto,
+      criadoEm: new Date(),
+    });
+    await novoUsuario.save();
+    res.status(201).json(novoUsuario);
+  } catch (erro) {
+    res.status(500).json({ erro: "Erro ao criar usuário" });
   }
 });
 
 module.exports = router;
-
