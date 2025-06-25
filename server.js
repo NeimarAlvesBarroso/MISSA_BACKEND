@@ -3,8 +3,7 @@ const cors = require("cors");
 const dotenv = require("dotenv");
 const mongoose = require("mongoose");
 const morgan = require("morgan");
-const path = require("path"); // ✅ Necessário para caminhos absolutos
-const uploadsRoutes = require("./routes/uploads"); // ✅ Apenas uma vez
+const path = require("path");
 
 dotenv.config();
 
@@ -14,22 +13,22 @@ const app = express();
 app.use(express.json());
 app.use(
   cors({
-    origin: process.env.CORS_ORIGIN || "http://localhost:3000",
+    origin: process.env.CORS_ORIGIN || "*", // ← mais seguro para produção: especifique o domínio
   })
 );
 app.use(morgan("dev"));
 
-// ✅ Conexão com MongoDB
+// ✅ MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("🟢 MongoDB conectado"))
-  .catch((erro) => console.error("🔴 Erro ao conectar no MongoDB:", erro));
+  .catch((err) => console.error("🔴 Erro ao conectar no MongoDB:", err));
 
-// ✅ Servir arquivos da pasta "uploads"
-app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Caminho absoluto garantido
-app.use("/api/uploads", uploadsRoutes); // API de upload + timeline
+// ✅ Servir uploads com caminho absoluto (Railway precisa disso)
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ✅ Rotas principais da API
+// ✅ Rotas
+app.use("/api/uploads", require("./routes/uploads"));
 app.use("/auth", require("./routes/auth"));
 app.use("/usuarios", require("./routes/usuarios"));
 app.use("/midias", require("./routes/midias"));
@@ -39,12 +38,12 @@ app.use("/vetor", require("./routes/vetor"));
 app.use("/contribuicoes", require("./routes/contribuicoes"));
 app.use("/albunsfamilia", require("./routes/albunsfamilia"));
 
-// ✅ Rota de verificação
+// ✅ Verificação de status
 app.get("/", (req, res) => {
   res.send("🌐 API MISSA ativa");
 });
 
-// ✅ Início do servidor
+// ✅ Inicialização correta para Railway
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
