@@ -1,11 +1,13 @@
+// models/relacaovetorial.js
 const mongoose = require("mongoose");
 
-const RelacaoVetorialSchema = new mongoose.Schema({
-  origem: { type: String, required: true },
-  destino: { type: String, required: true },
-  tipo: { type: String, required: true },
-  intensidade: { type: Number, default: 1 },
+const relacaoVetorialSchema = new mongoose.Schema({
+  origem: String,
+  destino: String,
+  tipo: String,
+  intensidade: Number,
+  tags: [String],
   criadoEm: { type: Date, default: Date.now }
 });
 
-module.exports = mongoose.model("RelacaoVetorial", RelacaoVetorialSchema);
+module.exports = mongoose.model("RelacaoVetorial", relacaoVetorialSchema);
