@@ -9,41 +9,44 @@ dotenv.config();
 
 const app = express();
 
-// ✅ Middlewares
+// ✅ Middleware: JSON e logger
 app.use(express.json());
-app.use(
-  cors({
-    origin: process.env.CORS_ORIGIN || "*", // ← mais seguro para produção: especifique o domínio
-  })
-);
 app.use(morgan("dev"));
 
-// ✅ MongoDB
+// ✅ CORS — produção recomenda domínio fixo
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || "*",
+  })
+);
+
+// ✅ Conexão com MongoDB
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("🟢 MongoDB conectado"))
   .catch((err) => console.error("🔴 Erro ao conectar no MongoDB:", err));
 
-// ✅ Servir uploads com caminho absoluto (Railway precisa disso)
+// ✅ Servir arquivos estáticos (imagens/vídeos)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// ✅ Rotas
-app.use("/api/uploads", require("./routes/uploads"));
-app.use("/auth", require("./routes/auth"));
-app.use("/usuarios", require("./routes/usuarios"));
-app.use("/midias", require("./routes/midias"));
-app.use("/acervos", require("./routes/acervos"));
-app.use("/relacaovetorial", require("./routes/relacaovetorial"));
-app.use("/vetor", require("./routes/vetor"));
-app.use("/contribuicoes", require("./routes/contribuicoes"));
-app.use("/albunsfamilia", require("./routes/albunsfamilia"));
+// ✅ Rotas principais da API
+app.use("/api/uploads", require("./routes/uploads"));                  // Upload de arquivos
+app.use("/auth", require("./routes/auth"));                           // Autenticação
+app.use("/usuarios", require("./routes/usuarios"));                   // Usuários
+app.use("/midias", require("./routes/midias"));                       // Mídias
+app.use("/acervos", require("./routes/acervos"));                     // Acervos gerais
+app.use("/relacaovetorial", require("./routes/relacaovetorial"));     // Relações vetoriais
+app.use("/vetor", require("./routes/vetor"));                         // Vetor
+app.use("/contribuicoes", require("./routes/contribuicoes"));         // Timeline
+app.use("/albunsfamilia", require("./routes/albunsfamilia"));         // Álbum de família
+app.use("/acervosinstitucional", require("./routes/acervosinstitucional")); // ✅ Acervo institucional
 
-// ✅ Verificação de status
+// ✅ Verificação da API
 app.get("/", (req, res) => {
   res.send("🌐 API MISSA ativa");
 });
 
-// ✅ Inicialização correta para Railway
+// ✅ Inicialização do servidor
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
